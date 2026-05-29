@@ -1,10 +1,17 @@
 import { useState, useEffect } from 'react'
 import dayjs from 'dayjs'
+import { AnimatePresence, motion } from 'framer-motion'
 import MonthlyView from '../components/MonthlyView'
 import WeeklyView from '../components/WeeklyView'
 import EventPanel from '../components/EventPanel'
 import { eventApi, memberApi } from '../api/client'
 import { useLocalStorage, useSessionStorage } from '../hooks/useStorage'
+
+const slideVariants = {
+  enter: (dir) => ({ opacity: 0, x: dir > 0 ? 20 : -20 }),
+  center: { opacity: 1, x: 0 },
+  exit: (dir) => ({ opacity: 0, x: dir > 0 ? -20 : 20 }),
+}
 
 export default function CalendarPage() {
   const ls = useLocalStorage()
@@ -12,6 +19,7 @@ export default function CalendarPage() {
   const teamCode = ls.get('team_code')
 
   const [view, setView] = useState(ss.get('current_view') || 'monthly')
+  const [direction, setDirection] = useState(0)
   const [current, setCurrent] = useState(dayjs())
   const [selectedDate, setSelectedDate] = useState(
     ss.get('selected_date') ? dayjs(ss.get('selected_date')) : dayjs()
@@ -29,6 +37,7 @@ export default function CalendarPage() {
   }, [teamCode, current])
 
   function handleViewChange(v) {
+    setDirection(v === 'weekly' ? 1 : -1)
     setView(v)
     ss.set('current_view', v)
   }
@@ -45,38 +54,70 @@ export default function CalendarPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl font-bold">팀 캘린더</h1>
-        <div className="flex gap-2">
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-xl font-semibold text-[#1d1d1f] tracking-[-0.374px]">팀 캘린더</h1>
+        <div className="flex gap-1 bg-[#f5f5f7] p-0.5 rounded-full">
           {['monthly', 'weekly'].map(v => (
-            <button key={v} onClick={() => handleViewChange(v)}
-              className={`px-3 py-1 rounded text-sm ${view === v ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
+            <motion.button key={v} onClick={() => handleViewChange(v)}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors
+                ${view === v ? 'bg-white text-[#1d1d1f] shadow-sm' : 'text-[#6e6e73]'}`}>
               {v === 'monthly' ? '월간' : '주간'}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
+
       <div className="flex items-center gap-3 mb-4">
-        <button onClick={() => setCurrent(c => c.subtract(1, view === 'monthly' ? 'month' : 'week'))}
-          className="px-2 py-1 text-gray-600">{'<'}</button>
-        <span className="font-semibold">
-          {view === 'monthly' ? current.format('YYYY년 MM월') : `${current.startOf('week').format('MM/DD')} ~ ${current.endOf('week').format('MM/DD')}`}
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          onClick={() => setCurrent(c => c.subtract(1, view === 'monthly' ? 'month' : 'week'))}
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e0e0e0] text-[#1d1d1f] transition-colors">
+          ‹
+        </motion.button>
+        <span className="font-semibold text-[#1d1d1f] tracking-[-0.374px] flex-1 text-center">
+          {view === 'monthly'
+            ? current.format('YYYY년 MM월')
+            : `${current.startOf('week').format('MM/DD')} ~ ${current.endOf('week').format('MM/DD')}`}
         </span>
-        <button onClick={() => setCurrent(c => c.add(1, view === 'monthly' ? 'month' : 'week'))}
-          className="px-2 py-1 text-gray-600">{'>'}</button>
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          onClick={() => setCurrent(c => c.add(1, view === 'monthly' ? 'month' : 'week'))}
+          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-[#e0e0e0] text-[#1d1d1f] transition-colors">
+          ›
+        </motion.button>
       </div>
-      {view === 'monthly'
-        ? <MonthlyView current={current} events={events} selectedDate={selectedDate} onSelectDate={handleSelectDate} />
-        : <WeeklyView current={current} events={events} selectedDate={selectedDate} onSelectDate={handleSelectDate} />
-      }
-      <div className="mt-4 flex gap-2 flex-wrap">
+
+      <AnimatePresence mode="wait" custom={direction}>
+        {view === 'monthly' ? (
+          <motion.div key="monthly" custom={direction}
+            variants={slideVariants}
+            initial="enter" animate="center" exit="exit"
+            transition={{ duration: 0.25, ease: 'easeInOut' }}>
+            <MonthlyView current={current} events={events} selectedDate={selectedDate} onSelectDate={handleSelectDate} />
+          </motion.div>
+        ) : (
+          <motion.div key="weekly" custom={direction}
+            variants={slideVariants}
+            initial="enter" animate="center" exit="exit"
+            transition={{ duration: 0.25, ease: 'easeInOut' }}>
+            <WeeklyView current={current} events={events} selectedDate={selectedDate} onSelectDate={handleSelectDate} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="mt-4 flex gap-3 flex-wrap">
         {members.map(m => (
-          <span key={m.id} className="flex items-center gap-1 text-sm">
-            <span className="w-3 h-3 rounded-full inline-block" style={{ backgroundColor: m.color }} />
+          <span key={m.id} className="flex items-center gap-1.5 text-sm text-[#1d1d1f]">
+            <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: m.color }} />
             {m.name}
           </span>
         ))}
       </div>
+
       <EventPanel
         teamCode={teamCode}
         selectedDate={selectedDate}
