@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { teamApi } from '../api/client'
 import { useLocalStorage } from '../hooks/useStorage'
+
+const btn = { whileTap: { scale: 0.95 }, transition: { type: 'spring', stiffness: 400, damping: 17 } }
 
 export default function Home() {
   const [code, setCode] = useState('')
@@ -37,41 +40,44 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="bg-white p-8 rounded-xl shadow-md w-80">
-        <h1 className="text-2xl font-bold text-center mb-6">팀 캘린더</h1>
-        <div className="flex gap-2 mb-6">
-          <button onClick={() => setMode('join')}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium ${mode === 'join' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
-            팀 참여
-          </button>
-          <button onClick={() => setMode('create')}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium ${mode === 'create' ? 'bg-blue-500 text-white' : 'bg-gray-100'}`}>
-            팀 만들기
-          </button>
+    <div className="min-h-screen flex items-center justify-center bg-[#f5f5f7]">
+      <div className="bg-white p-8 rounded-[18px] border border-[#e0e0e0] w-80">
+        <h1 className="text-2xl font-semibold text-center mb-6 text-[#1d1d1f] tracking-[-0.374px]">
+          팀 캘린더
+        </h1>
+        <div className="flex gap-2 mb-6 bg-[#f5f5f7] p-1 rounded-full">
+          {['join', 'create'].map(m => (
+            <motion.button key={m} onClick={() => setMode(m)} {...btn}
+              className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors
+                ${mode === m ? 'bg-white text-[#1d1d1f] shadow-sm' : 'text-[#6e6e73]'}`}>
+              {m === 'join' ? '팀 참여' : '팀 만들기'}
+            </motion.button>
+          ))}
         </div>
         {mode === 'join' ? (
           <>
             <input value={code} onChange={e => setCode(e.target.value)}
               placeholder="팀 코드 입력 (예: AB3K9XZ2)"
-              className="w-full border rounded-lg px-3 py-2 mb-3 text-sm" />
-            <button onClick={handleJoin}
-              className="w-full bg-blue-500 text-white py-2 rounded-lg font-medium">
+              className="w-full border border-[#e0e0e0] rounded-xl px-4 py-2.5 mb-3 text-[15px] text-[#1d1d1f] placeholder-[#6e6e73] outline-none focus:border-[#0066cc] transition-colors" />
+            <motion.button onClick={handleJoin} {...btn}
+              whileHover={{ scale: 1.02 }}
+              className="w-full bg-[#0066cc] text-white py-2.5 rounded-full font-medium text-[15px]">
               참여하기
-            </button>
+            </motion.button>
           </>
         ) : (
           <>
             <input value={teamName} onChange={e => setTeamName(e.target.value)}
               placeholder="팀 이름 입력"
-              className="w-full border rounded-lg px-3 py-2 mb-3 text-sm" />
-            <button onClick={handleCreate}
-              className="w-full bg-blue-500 text-white py-2 rounded-lg font-medium">
+              className="w-full border border-[#e0e0e0] rounded-xl px-4 py-2.5 mb-3 text-[15px] text-[#1d1d1f] placeholder-[#6e6e73] outline-none focus:border-[#0066cc] transition-colors" />
+            <motion.button onClick={handleCreate} {...btn}
+              whileHover={{ scale: 1.02 }}
+              className="w-full bg-[#0066cc] text-white py-2.5 rounded-full font-medium text-[15px]">
               만들기
-            </button>
+            </motion.button>
           </>
         )}
-        {error && <p className="text-red-500 text-sm mt-2 text-center">{error}</p>}
+        {error && <p className="text-red-500 text-sm mt-3 text-center">{error}</p>}
       </div>
     </div>
   )
