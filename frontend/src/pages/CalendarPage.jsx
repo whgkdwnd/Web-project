@@ -26,6 +26,13 @@ export default function CalendarPage() {
   )
   const [events, setEvents] = useState([])
   const [members, setMembers] = useState([])
+  const [copied, setCopied] = useState(false)
+
+  function handleCopy() {
+    navigator.clipboard.writeText(teamCode)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   useEffect(() => {
     memberApi.list(teamCode).then(res => setMembers(res.data))
@@ -54,7 +61,7 @@ export default function CalendarPage() {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-3">
         <h1 className="text-xl font-semibold text-[#1d1d1f] tracking-[-0.374px]">팀 캘린더</h1>
         <div className="flex gap-1 bg-[#f5f5f7] p-0.5 rounded-full">
           {['monthly', 'weekly'].map(v => (
@@ -68,6 +75,15 @@ export default function CalendarPage() {
           ))}
         </div>
       </div>
+
+      <motion.button
+        onClick={handleCopy}
+        whileTap={{ scale: 0.97 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+        className="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-[#f5f5f7] border border-[#e0e0e0] text-sm text-[#6e6e73] hover:bg-white transition-colors">
+        <span className="font-mono font-medium text-[#1d1d1f] tracking-widest">{teamCode}</span>
+        <span className="text-xs">{copied ? '✓ 복사됨' : '복사'}</span>
+      </motion.button>
 
       <div className="flex items-center gap-3 mb-4">
         <motion.button
