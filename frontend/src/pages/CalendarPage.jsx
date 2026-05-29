@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { AnimatePresence, motion } from 'framer-motion'
 import MonthlyView from '../components/MonthlyView'
@@ -14,6 +15,7 @@ const slideVariants = {
 }
 
 export default function CalendarPage() {
+  const navigate = useNavigate()
   const ls = useLocalStorage()
   const ss = useSessionStorage()
   const teamCode = ls.get('team_code')
@@ -32,6 +34,14 @@ export default function CalendarPage() {
     navigator.clipboard.writeText(teamCode)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
+  }
+
+  function handleLeave() {
+    ls.remove('team_code')
+    ls.remove('member_id')
+    ls.remove('member_name')
+    ls.remove('member_color')
+    navigate('/', { replace: true })
   }
 
   useEffect(() => {
@@ -76,14 +86,23 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <motion.button
-        onClick={handleCopy}
-        whileTap={{ scale: 0.97 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-        className="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-[#f5f5f7] border border-[#e0e0e0] text-sm text-[#6e6e73] hover:bg-white transition-colors">
-        <span className="font-mono font-medium text-[#1d1d1f] tracking-widest">{teamCode}</span>
-        <span className="text-xs">{copied ? '✓ 복사됨' : '복사'}</span>
-      </motion.button>
+      <div className="flex items-center justify-between mb-4">
+        <motion.button
+          onClick={handleCopy}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f5f5f7] border border-[#e0e0e0] text-sm text-[#6e6e73] hover:bg-white transition-colors">
+          <span className="font-mono font-medium text-[#1d1d1f] tracking-widest">{teamCode}</span>
+          <span className="text-xs">{copied ? '✓ 복사됨' : '복사'}</span>
+        </motion.button>
+        <motion.button
+          onClick={handleLeave}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          className="text-xs text-[#6e6e73] px-3 py-1.5 rounded-full hover:bg-[#f5f5f7] transition-colors">
+          팀 변경
+        </motion.button>
+      </div>
 
       <div className="flex items-center gap-3 mb-4">
         <motion.button
