@@ -29,6 +29,9 @@ out/
 # Docker
 *.log
 
+# Test artifacts
+backend/test.db
+
 # OS
 .DS_Store
 Thumbs.db
