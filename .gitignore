@@ -1,5 +1,7 @@
 # Docs
 docs/
+DESIGN.md
+**/DESIGN.md
 
 # Python
 __pycache__/
