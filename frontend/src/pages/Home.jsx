@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { teamApi } from '../api/client'
@@ -13,6 +13,13 @@ export default function Home() {
   const [error, setError] = useState('')
   const navigate = useNavigate()
   const ls = useLocalStorage()
+
+  useEffect(() => {
+    const teamCode = ls.get('team_code')
+    const memberId = ls.get('member_id')
+    if (teamCode && memberId) navigate('/calendar', { replace: true })
+    else if (teamCode) navigate('/join', { replace: true })
+  }, [])
 
   async function handleJoin() {
     try {
