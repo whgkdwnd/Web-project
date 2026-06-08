@@ -24,12 +24,20 @@ export default function Home() {
   async function handleJoin() {
     try {
       const res = await teamApi.get(code.toUpperCase())
-      ls.set('team_code', res.data.code)
-      ls.remove('member_id')
-      ls.remove('member_name')
-      ls.remove('member_color')
-      const memberId = ls.get('member_id')
-      navigate(memberId ? '/calendar' : '/join')
+      const teamCode = res.data.code
+      ls.set('team_code', teamCode)
+      const saved = (ls.get('member_by_team') || {})[teamCode]
+      if (saved) {
+        ls.set('member_id', saved.id)
+        ls.set('member_name', saved.name)
+        ls.set('member_color', saved.color)
+        navigate('/calendar')
+      } else {
+        ls.remove('member_id')
+        ls.remove('member_name')
+        ls.remove('member_color')
+        navigate('/join')
+      }
     } catch {
       setError('팀을 찾을 수 없습니다.')
     }

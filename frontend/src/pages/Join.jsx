@@ -26,6 +26,9 @@ export default function Join() {
     ls.set('member_id', res.data.id)
     ls.set('member_name', res.data.name)
     ls.set('member_color', res.data.color)
+    const byTeam = ls.get('member_by_team') || {}
+    byTeam[code] = { id: res.data.id, name: res.data.name, color: res.data.color }
+    ls.set('member_by_team', byTeam)
     navigate('/calendar')
   }
 

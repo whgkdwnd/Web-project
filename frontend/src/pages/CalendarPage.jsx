@@ -37,6 +37,12 @@ export default function CalendarPage() {
   }
 
   function handleLeave() {
+    const memberId = ls.get('member_id')
+    if (teamCode && memberId) {
+      const byTeam = ls.get('member_by_team') || {}
+      byTeam[teamCode] = { id: memberId, name: ls.get('member_name'), color: ls.get('member_color') }
+      ls.set('member_by_team', byTeam)
+    }
     ls.remove('team_code')
     ls.remove('member_id')
     ls.remove('member_name')
